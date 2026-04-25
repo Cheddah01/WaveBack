@@ -3,6 +3,7 @@ package com.example.customjoinmessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.UUID;
 
 public final class CustomJoinMessagePlugin extends JavaPlugin implements Listener, TabExecutor {
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
@@ -25,9 +27,11 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
     private boolean joinEnabled;
     private boolean joinSilent;
     private String joinMessageTemplate;
+    private SoundSettings joinSound;
     private boolean leaveEnabled;
     private boolean leaveSilent;
     private String leaveMessageTemplate;
+    private SoundSettings leaveSound;
 
     @Override
     public void onEnable() {
@@ -55,6 +59,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
         }
 
         event.joinMessage(renderMessage(joinMessageTemplate, event.getPlayer()));
+        playSoundToOnlinePlayers(joinSound, null);
     }
 
     @EventHandler
@@ -69,6 +74,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
         }
 
         event.quitMessage(renderMessage(leaveMessageTemplate, event.getPlayer()));
+        playSoundToOnlinePlayers(leaveSound, event.getPlayer().getUniqueId());
     }
 
     @Override
@@ -114,6 +120,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
                         "<gray>[<green>+<gray>] <yellow>{player}</yellow> joined the server!"
                 )
         );
+        joinSound = loadSoundSettings(config, "join.sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
 
         leaveEnabled = config.getBoolean("leave.enabled", true);
         leaveSilent = config.getBoolean("leave.silent", false);
@@ -121,6 +128,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
                 "leave.message",
                 "<gray>[<red>-<gray>] <yellow>{player}</yellow> left the server."
         );
+        leaveSound = loadSoundSettings(config, "leave.sound", "ENTITY_ITEM_BREAK");
     }
 
     private Component renderMessage(String template, Player player) {
@@ -129,5 +137,41 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
                 .replace("{display_name}", PLAIN_TEXT.serialize(player.displayName()));
 
         return MINI_MESSAGE.deserialize(rendered);
+    }
+
+    private SoundSettings loadSoundSettings(FileConfiguration config, String path, String defaultName) {
+        boolean soundEnabled = config.getBoolean(path + ".enabled", false);
+        String soundName = config.getString(path + ".name", defaultName);
+        float volume = (float) config.getDouble(path + ".volume", 1.0);
+        float pitch = (float) config.getDouble(path + ".pitch", 1.0);
+
+        Sound sound = null;
+        if (soundEnabled) {
+            try {
+                sound = Sound.valueOf(soundName.toUpperCase());
+            } catch (IllegalArgumentException exception) {
+                getLogger().warning("Invalid sound '" + soundName + "' at " + path + ".name; sound disabled.");
+                soundEnabled = false;
+            }
+        }
+
+        return new SoundSettings(soundEnabled, sound, volume, pitch);
+    }
+
+    private void playSoundToOnlinePlayers(SoundSettings settings, @Nullable UUID excludedPlayerId) {
+        if (!settings.enabled() || settings.sound() == null) {
+            return;
+        }
+
+        for (Player player : getServer().getOnlinePlayers()) {
+            if (excludedPlayerId != null && player.getUniqueId().equals(excludedPlayerId)) {
+                continue;
+            }
+
+            player.playSound(player.getLocation(), settings.sound(), settings.volume(), settings.pitch());
+        }
+    }
+
+    private record SoundSettings(boolean enabled, @Nullable Sound sound, float volume, float pitch) {
     }
 }

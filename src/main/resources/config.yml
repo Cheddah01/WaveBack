@@ -14,6 +14,12 @@ join:
   # If true, this sends no public join message.
   silent: false
 
+  sound:
+    enabled: false
+    name: ENTITY_EXPERIENCE_ORB_PICKUP
+    volume: 1.0
+    pitch: 1.0
+
 leave:
   # Set enabled to false if you want Paper's default leave messages again.
   enabled: true
@@ -22,3 +28,9 @@ leave:
 
   # If true, this sends no public leave message.
   silent: false
+
+  sound:
+    enabled: false
+    name: ENTITY_ITEM_BREAK
+    volume: 1.0
+    pitch: 1.0
