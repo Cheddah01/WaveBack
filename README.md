@@ -1,4 +1,4 @@
-# CustomJoinMessage
+# WaveBack 👋🏻
 
 A small PaperMC 1.21.11 plugin that lets you customize the public join and leave messages shown on your server.
 
