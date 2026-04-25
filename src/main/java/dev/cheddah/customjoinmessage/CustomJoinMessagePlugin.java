@@ -122,7 +122,25 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
             return true;
         }
 
+        if (args.length == 1 && args[0].equalsIgnoreCase("testreward")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(MINI_MESSAGE.deserialize("<red>Only players can test rewards."));
+                return true;
+            }
+
+            if (!player.hasPermission("customjoinmessage.testreward")) {
+                player.sendMessage(MINI_MESSAGE.deserialize("<red>You do not have permission to test rewards."));
+                return true;
+            }
+
+            if (rewardsManager != null) {
+                rewardsManager.testRewards(player);
+            }
+            return true;
+        }
+
         sender.sendMessage(MINI_MESSAGE.deserialize("<red>Usage: /" + label + " reload"));
+        sender.sendMessage(MINI_MESSAGE.deserialize("<red>Usage: /" + label + " testreward"));
         return true;
     }
 
@@ -134,7 +152,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
             @NotNull String[] args
     ) {
         if (args.length == 1) {
-            return List.of("reload");
+            return List.of("reload", "testreward");
         }
 
         return List.of();

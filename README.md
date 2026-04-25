@@ -96,6 +96,14 @@ or:
 /cjm reload
 ```
 
+To test the configured welcome-back reward bundle by yourself:
+
+```text
+/cjm testreward
+```
+
+This uses you as both `{player}` and `{joiner}` and requires `customjoinmessage.testreward`.
+
 ## MiniMessage formatting
 
 MiniMessage is Paper's modern text format for colors, decorations, gradients, and other rich chat styling.

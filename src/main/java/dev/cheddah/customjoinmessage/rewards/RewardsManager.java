@@ -95,6 +95,11 @@ public final class RewardsManager {
         }
     }
 
+    public void testRewards(Player player) {
+        giveRewards(player, player);
+        sendMessages(player, player);
+    }
+
     private boolean hasMinimumPlaytime(Player joiner) {
         int minimumMinutes = config.minimumJoinerPlaytimeMinutes();
         if (minimumMinutes <= 0) {

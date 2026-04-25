@@ -24,3 +24,6 @@ permissions:
   customjoinmessage.bypasscooldown:
     description: Bypasses the per-greeter reward cooldown.
     default: false
+  customjoinmessage.testreward:
+    description: Allows testing the configured welcome-back reward bundle.
+    default: op
