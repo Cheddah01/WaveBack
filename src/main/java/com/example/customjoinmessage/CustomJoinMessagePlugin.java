@@ -38,6 +38,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
     private boolean leaveSilent;
     private String leaveMessageTemplate;
     private SoundSettings leaveSound;
+    private FireworkSettings leaveFirework;
 
     @Override
     public void onEnable() {
@@ -82,6 +83,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
 
         event.quitMessage(renderMessage(leaveMessageTemplate, event.getPlayer()));
         playSoundToOnlinePlayers(leaveSound, event.getPlayer().getUniqueId());
+        spawnFirework(event.getPlayer(), leaveFirework);
     }
 
     @Override
@@ -138,6 +140,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
                 "<gray>[<red>-<gray>] <yellow>{player}</yellow> left the server."
         );
         leaveSound = loadSoundSettings(config, "leave.sound", "ENTITY_ITEM_BREAK");
+        leaveFirework = loadFireworkSettings(config, "leave.firework");
     }
 
     private void updateConfigDefaults() {
