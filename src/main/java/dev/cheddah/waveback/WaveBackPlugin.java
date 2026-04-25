@@ -1,8 +1,8 @@
-package dev.cheddah.customjoinmessage;
+package dev.cheddah.waveback;
 
-import dev.cheddah.customjoinmessage.rewards.ChatWatcher;
-import dev.cheddah.customjoinmessage.rewards.JoinWatcher;
-import dev.cheddah.customjoinmessage.rewards.RewardsManager;
+import dev.cheddah.waveback.rewards.ChatWatcher;
+import dev.cheddah.waveback.rewards.JoinWatcher;
+import dev.cheddah.waveback.rewards.RewardsManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public final class CustomJoinMessagePlugin extends JavaPlugin implements Listener, TabExecutor {
+public final class WaveBackPlugin extends JavaPlugin implements Listener, TabExecutor {
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     private static final PlainTextComponentSerializer PLAIN_TEXT = PlainTextComponentSerializer.plainText();
 
@@ -57,7 +57,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
         getServer().getPluginManager().registerEvents(new JoinWatcher(rewardsManager), this);
         getServer().getPluginManager().registerEvents(new ChatWatcher(this, rewardsManager), this);
 
-        var command = getCommand("customjoinmessage");
+        var command = getCommand("waveback");
         if (command != null) {
             command.setExecutor(this);
             command.setTabCompleter(this);
@@ -118,7 +118,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
             if (rewardsManager != null) {
                 rewardsManager.reload(false);
             }
-            sender.sendMessage(MINI_MESSAGE.deserialize("<green>CustomJoinMessage config reloaded."));
+            sender.sendMessage(MINI_MESSAGE.deserialize("<green>WaveBack config reloaded."));
             return true;
         }
 
@@ -128,7 +128,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
                 return true;
             }
 
-            if (!player.hasPermission("customjoinmessage.testreward")) {
+            if (!player.hasPermission("waveback.testreward")) {
                 player.sendMessage(MINI_MESSAGE.deserialize("<red>You do not have permission to test rewards."));
                 return true;
             }

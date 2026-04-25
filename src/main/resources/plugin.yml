@@ -1,29 +1,29 @@
-name: CustomJoinMessage
+name: WaveBack
 version: ${version}
-main: dev.cheddah.customjoinmessage.CustomJoinMessagePlugin
+main: dev.cheddah.waveback.WaveBackPlugin
 api-version: "1.21"
-description: Customizes player join messages.
+description: Customize join/leave messages and reward players for welcoming others back.
 author: Colby
 softdepend: [Vault]
 
 commands:
-  customjoinmessage:
-    description: Reloads the CustomJoinMessage configuration.
-    usage: /customjoinmessage reload
+  waveback:
+    description: Reloads the WaveBack configuration.
+    usage: /waveback reload
     aliases:
-      - cjm
-    permission: customjoinmessage.reload
+      - wb
+    permission: waveback.reload
 
 permissions:
-  customjoinmessage.reload:
-    description: Allows reloading the CustomJoinMessage configuration.
+  waveback.reload:
+    description: Allows reloading the WaveBack configuration.
     default: op
-  customjoinmessage.greet:
+  waveback.greet:
     description: Allows earning rewards for greeting returning players.
     default: true
-  customjoinmessage.bypasscooldown:
+  waveback.bypasscooldown:
     description: Bypasses the per-greeter reward cooldown.
     default: false
-  customjoinmessage.testreward:
+  waveback.testreward:
     description: Allows testing the configured welcome-back reward bundle.
     default: op

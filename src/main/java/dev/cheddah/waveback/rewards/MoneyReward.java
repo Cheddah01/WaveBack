@@ -1,4 +1,4 @@
-package dev.cheddah.customjoinmessage.rewards;
+package dev.cheddah.waveback.rewards;
 
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.entity.Player;

@@ -1,4 +1,4 @@
-package dev.cheddah.customjoinmessage.rewards;
+package dev.cheddah.waveback.rewards;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

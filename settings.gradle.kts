@@ -14,4 +14,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "custom-join-message"
+rootProject.name = "waveback"

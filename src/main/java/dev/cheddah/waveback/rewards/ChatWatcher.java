@@ -1,4 +1,4 @@
-package dev.cheddah.customjoinmessage.rewards;
+package dev.cheddah.waveback.rewards;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;

@@ -1,4 +1,4 @@
-package dev.cheddah.customjoinmessage.rewards;
+package dev.cheddah.waveback.rewards;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;

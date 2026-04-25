@@ -29,6 +29,6 @@ tasks {
     }
 
     jar {
-        archiveBaseName.set("custom-join-message")
+        archiveBaseName.set("waveback")
     }
 }

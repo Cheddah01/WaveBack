@@ -1,4 +1,4 @@
-package dev.cheddah.customjoinmessage.rewards;
+package dev.cheddah.waveback.rewards;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
@@ -69,7 +69,7 @@ public final class RewardsManager {
     }
 
     public void handleGreeting(Player greeter, String message) {
-        if (!config.enabled() || !greeter.hasPermission("customjoinmessage.greet") || !config.matchesTrigger(message)) {
+        if (!config.enabled() || !greeter.hasPermission("waveback.greet") || !config.matchesTrigger(message)) {
             return;
         }
 
@@ -86,7 +86,7 @@ public final class RewardsManager {
             }
 
             window.markRewarded(greeter.getUniqueId());
-            if (!greeter.hasPermission("customjoinmessage.bypasscooldown")) {
+            if (!greeter.hasPermission("waveback.bypasscooldown")) {
                 rewardCooldowns.put(greeter.getUniqueId(), System.currentTimeMillis());
             }
 
@@ -119,7 +119,7 @@ public final class RewardsManager {
             return false;
         }
 
-        return greeter.hasPermission("customjoinmessage.bypasscooldown") || !isOnCooldown(greeter.getUniqueId());
+        return greeter.hasPermission("waveback.bypasscooldown") || !isOnCooldown(greeter.getUniqueId());
     }
 
     private boolean isOnCooldown(UUID greeterId) {

@@ -1,110 +1,126 @@
 # WaveBack 👋🏻
 
-A small PaperMC 1.21.11 plugin that lets you customize the public join and leave messages shown on your server.
+WaveBack is a PaperMC plugin for custom join/leave messages and welcome-back rewards. Players can greet returning players with phrases like `wb`, and WaveBack can reward those greeters with commands, items, or Vault economy money.
 
-## Build
+## Features
 
-This project uses Gradle and Java 21.
+- Custom join and leave messages with MiniMessage formatting
+- Optional join and leave sounds
+- Optional join and leave fireworks
+- Configurable welcome-back greeting window
+- Greeting triggers like `wb`, `welcome back`, `wbb`, and `dubs`
+- Reward bundles with commands, items, and optional Vault economy money
+- Cooldowns, per-join reward caps, and minimum playtime checks to reduce farming
+- Reload command and solo reward test command
 
-```bash
-./gradlew build
-```
+## Requirements
 
-On Windows, use:
+- PaperMC 1.21.x
+- Java 21
+- Vault is optional and only required for money rewards
+- An economy plugin is required if you enable Vault money rewards
 
-```bat
-gradlew.bat build
-```
+## Installation
 
-The plugin jar will be created in:
-
-```text
-build/libs/custom-join-message-1.0.0-b6.jar
-```
-
-Copy that jar into your Paper server's `plugins` folder and restart the server.
-
-## Release builds
-
-Update `buildNumber` in `gradle.properties` for each release. The plugin version and jar filename both include that build number, such as `1.0.0-b6`.
-
-When the plugin starts or `/cjm reload` runs, missing config keys are copied from the bundled default config into your existing server config.
-
-## Configure
-
-After the first server start, edit:
+1. Download the latest WaveBack jar.
+2. Put it in your server's `plugins` folder.
+3. Restart the server.
+4. Edit the generated config:
 
 ```text
-plugins/CustomJoinMessage/config.yml
+plugins/WaveBack/config.yml
 ```
 
-Example:
+5. Reload the plugin:
+
+```text
+/wb reload
+```
+
+## Commands
+
+| Command | Description | Permission |
+| --- | --- | --- |
+| `/waveback reload` | Reloads the config | `waveback.reload` |
+| `/wb reload` | Alias for reload | `waveback.reload` |
+| `/wb testreward` | Gives yourself the configured reward bundle for testing | `waveback.testreward` |
+
+## Permissions
+
+| Permission | Default | Description |
+| --- | --- | --- |
+| `waveback.reload` | OP | Allows reloading WaveBack |
+| `waveback.greet` | Everyone | Allows earning rewards for greeting returning players |
+| `waveback.bypasscooldown` | False | Bypasses the per-greeter reward cooldown |
+| `waveback.testreward` | OP | Allows testing the configured reward bundle |
+
+## Configuration
+
+WaveBack adds missing config keys automatically when the plugin starts or `/wb reload` runs.
+
+Join and leave messages support MiniMessage:
 
 ```yaml
 join:
   enabled: true
   message: "<gray>[<green>+<gray>] <aqua>{player}</aqua> arrived!"
   silent: false
-  sound:
-    enabled: true
-    name: ENTITY_EXPERIENCE_ORB_PICKUP
-    volume: 1.0
-    pitch: 1.0
-  firework:
-    enabled: true
-    power: 1
-    type: BALL
-    flicker: false
-    trail: true
-    colors:
-      - LIME
-      - YELLOW
-    fade-colors:
-      - AQUA
 
 leave:
   enabled: true
   message: "<gray>[<red>-<gray>] <aqua>{player}</aqua> headed out."
   silent: false
-  sound:
-    enabled: true
-    name: ENTITY_ITEM_BREAK
-    volume: 1.0
-    pitch: 1.0
-  firework:
-    enabled: true
-    power: 1
-    type: BALL
-    flicker: false
-    trail: true
-    colors:
-      - RED
-      - ORANGE
-    fade-colors:
-      - YELLOW
 ```
 
-Then run:
+Welcome-back rewards are configured under `rewards`:
 
-```text
-/customjoinmessage reload
+```yaml
+rewards:
+  enabled: true
+  greeting-window-seconds: 30
+  triggers:
+    - wb
+    - welcome back
+    - wbb
+    - dubs
+  whole-message-only: true
+  max-rewards-per-join: 3
+  reward-cooldown-seconds: 300
+  reward-on-first-join: false
+  minimum-joiner-playtime-minutes: 10
+  bundle:
+    - type: money
+      amount: 50.0
+    - type: item
+      material: DIAMOND
+      amount: 1
+      name: "<aqua>Thank-You Diamond"
+      lore:
+        - "<gray>For being a kind soul."
+  messages:
+    reward-received: "<gray>✦ Thanks for welcoming <yellow>{joiner}</yellow><gray> back!"
+    broadcast: ""
 ```
 
-or:
+## Reward Types
 
-```text
-/cjm reload
-```
+| Type | Description |
+| --- | --- |
+| `command` | Runs a console command. Supports `{player}` and `{joiner}` |
+| `money` | Gives Vault economy money when Vault and an economy plugin are installed |
+| `item` | Gives a Minecraft item, with optional MiniMessage name and lore |
 
-To test the configured welcome-back reward bundle by yourself:
+If a rewarded player's inventory is full, item leftovers are dropped at their feet.
 
-```text
-/cjm testreward
-```
+## Placeholders
 
-This uses you as both `{player}` and `{joiner}` and requires `customjoinmessage.testreward`.
+| Placeholder | Meaning |
+| --- | --- |
+| `{player}` | The joining player in join/leave messages, or the greeter in reward messages/commands |
+| `{display_name}` | The joining player's display name in join/leave messages |
+| `{joiner}` | The returning player being welcomed back in reward messages/commands |
 
-## MiniMessage formatting
+## MiniMessage Formatting
 
 MiniMessage is Paper's modern text format for colors, decorations, gradients, and other rich chat styling.
 
@@ -135,13 +151,30 @@ Coming from legacy `&` codes?
 
 Official docs: https://docs.advntr.dev/minimessage/format.html
 
-## Placeholders
-
-- `{player}`: the player's username
-- `{display_name}`: the player's display name
-
-Messages use MiniMessage formatting, such as `<green>`, `<yellow>`, `<bold>`, and gradients.
+## Sounds And Fireworks
 
 Sound names use Bukkit's `Sound` enum names, such as `ENTITY_EXPERIENCE_ORB_PICKUP`, `BLOCK_NOTE_BLOCK_PLING`, or `ENTITY_ITEM_BREAK`.
 
 Firework types use Bukkit's `FireworkEffect.Type` names: `BALL`, `BALL_LARGE`, `BURST`, `CREEPER`, and `STAR`.
+
+## Building
+
+This project uses Gradle and Java 21.
+
+```bash
+./gradlew build
+```
+
+On Windows:
+
+```bat
+gradlew.bat build
+```
+
+The jar is created in:
+
+```text
+build/libs/waveback-1.0.0-b6.jar
+```
+
+Update `buildNumber` in `gradle.properties` before cutting a release build.
