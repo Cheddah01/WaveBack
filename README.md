@@ -13,14 +13,16 @@ gradle build
 The plugin jar will be created in:
 
 ```text
-build/libs/custom-join-message-1.0.0-b4.jar
+build/libs/custom-join-message-1.0.0-b5.jar
 ```
 
 Copy that jar into your Paper server's `plugins` folder and restart the server.
 
 ## Release builds
 
-Update `buildNumber` in `gradle.properties` for each release. The plugin version and jar filename both include that build number, such as `1.0.0-b4`.
+Update `buildNumber` in `gradle.properties` for each release. The plugin version and jar filename both include that build number, such as `1.0.0-b5`.
+
+When the plugin starts or `/cjm reload` runs, missing config keys are copied from the bundled default config into your existing server config.
 
 ## Configure
 

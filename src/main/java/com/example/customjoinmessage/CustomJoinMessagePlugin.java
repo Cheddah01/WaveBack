@@ -41,7 +41,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
+        updateConfigDefaults();
         loadSettings();
 
         getServer().getPluginManager().registerEvents(this, this);
@@ -93,6 +93,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
     ) {
         if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
             reloadConfig();
+            updateConfigDefaults();
             loadSettings();
             sender.sendMessage(MINI_MESSAGE.deserialize("<green>CustomJoinMessage config reloaded."));
             return true;
@@ -137,6 +138,12 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
                 "<gray>[<red>-<gray>] <yellow>{player}</yellow> left the server."
         );
         leaveSound = loadSoundSettings(config, "leave.sound", "ENTITY_ITEM_BREAK");
+    }
+
+    private void updateConfigDefaults() {
+        saveDefaultConfig();
+        getConfig().options().copyDefaults(true);
+        saveConfig();
     }
 
     private Component renderMessage(String template, Player player) {
