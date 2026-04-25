@@ -174,7 +174,7 @@ gradlew.bat build
 The jar is created in:
 
 ```text
-build/libs/waveback-1.0.0-b6.jar
+build/libs/waveback-1.0.0.jar
 ```
 
-Update `buildNumber` in `gradle.properties` before cutting a release build.
+Update `baseVersion` in `gradle.properties` before cutting a release build.

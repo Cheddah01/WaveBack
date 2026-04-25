@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "dev.cheddah"
-version = "${property("baseVersion")}-b${property("buildNumber")}"
+version = property("baseVersion") as String
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
