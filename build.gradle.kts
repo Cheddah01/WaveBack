@@ -2,7 +2,7 @@ plugins {
     java
 }
 
-group = "com.example"
+group = "dev.cheddah"
 version = "${property("baseVersion")}-b${property("buildNumber")}"
 
 java {

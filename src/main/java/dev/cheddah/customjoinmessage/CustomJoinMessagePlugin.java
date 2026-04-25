@@ -1,4 +1,4 @@
-package com.example.customjoinmessage;
+package dev.cheddah.customjoinmessage;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -66,7 +66,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
         }
 
         event.joinMessage(renderMessage(joinMessageTemplate, event.getPlayer()));
-        playSoundToOnlinePlayers(joinSound, null);
+        playSoundToOnlinePlayers(joinSound, event.getPlayer().getUniqueId());
         spawnFirework(event.getPlayer(), joinFirework);
     }
 
@@ -82,6 +82,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
         }
 
         event.quitMessage(renderMessage(leaveMessageTemplate, event.getPlayer()));
+        // On quit, the player is already disconnected, but keep the exclusion hook for call-site consistency.
         playSoundToOnlinePlayers(leaveSound, event.getPlayer().getUniqueId());
         spawnFirework(event.getPlayer(), leaveFirework);
     }
@@ -181,6 +182,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
         int power = Math.max(0, Math.min(3, config.getInt(path + ".power", 1)));
         boolean flicker = config.getBoolean(path + ".flicker", false);
         boolean trail = config.getBoolean(path + ".trail", true);
+        boolean instantDetonate = config.getBoolean(path + ".instant-detonate", false);
 
         FireworkEffect.Type type = FireworkEffect.Type.BALL;
         String typeName = config.getString(path + ".type", "BALL");
@@ -201,7 +203,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
                 .trail(trail)
                 .build();
 
-        return new FireworkSettings(fireworkEnabled, power, effect);
+        return new FireworkSettings(fireworkEnabled, power, effect, instantDetonate);
     }
 
     private List<Color> loadColors(List<String> colorNames, List<Color> defaults) {
@@ -266,12 +268,16 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
             meta.setPower(settings.power());
             meta.addEffect(settings.effect());
             firework.setFireworkMeta(meta);
+            firework.setShotAtAngle(false);
+            if (settings.instantDetonate()) {
+                firework.detonate();
+            }
         }, 5L);
     }
 
     private record SoundSettings(boolean enabled, @Nullable Sound sound, float volume, float pitch) {
     }
 
-    private record FireworkSettings(boolean enabled, int power, FireworkEffect effect) {
+    private record FireworkSettings(boolean enabled, int power, FireworkEffect effect, boolean instantDetonate) {
     }
 }

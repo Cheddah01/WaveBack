@@ -26,6 +26,8 @@ join:
     type: BALL
     flicker: false
     trail: true
+    # If true, the firework explodes in place instead of flying upward.
+    instant-detonate: false
     colors:
       - LIME
       - YELLOW
@@ -53,6 +55,8 @@ leave:
     type: BALL
     flicker: false
     trail: true
+    # If true, the firework explodes in place instead of flying upward.
+    instant-detonate: false
     colors:
       - RED
       - ORANGE

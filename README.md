@@ -7,7 +7,13 @@ A small PaperMC 1.21.11 plugin that lets you customize the public join and leave
 This project uses Gradle and Java 21.
 
 ```bash
-gradle build
+./gradlew build
+```
+
+On Windows, use:
+
+```bat
+gradlew.bat build
 ```
 
 The plugin jar will be created in:

@@ -1,7 +1,7 @@
 name: CustomJoinMessage
 version: ${version}
-main: com.example.customjoinmessage.CustomJoinMessagePlugin
-api-version: "1.21.11"
+main: dev.cheddah.customjoinmessage.CustomJoinMessagePlugin
+api-version: "1.21"
 description: Customizes player join messages.
 author: Colby
 
