@@ -1,0 +1,19 @@
+name: CustomJoinMessage
+version: ${version}
+main: com.example.customjoinmessage.CustomJoinMessagePlugin
+api-version: "1.21.11"
+description: Customizes player join messages.
+author: Colby
+
+commands:
+  customjoinmessage:
+    description: Reloads the CustomJoinMessage configuration.
+    usage: /customjoinmessage reload
+    aliases:
+      - cjm
+    permission: customjoinmessage.reload
+
+permissions:
+  customjoinmessage.reload:
+    description: Allows reloading the CustomJoinMessage configuration.
+    default: op

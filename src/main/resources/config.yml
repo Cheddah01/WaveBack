@@ -1,0 +1,24 @@
+# MiniMessage formatting is supported:
+# https://docs.advntr.dev/minimessage/format.html
+#
+# Placeholders:
+#   {player}       The player's username
+#   {display_name} The player's display name
+#
+join:
+  # Set enabled to false if you want Paper's default join messages again.
+  enabled: true
+
+  message: "<gray>[<green>+<gray>] <yellow>{player}</yellow> joined the server!"
+
+  # If true, this sends no public join message.
+  silent: false
+
+leave:
+  # Set enabled to false if you want Paper's default leave messages again.
+  enabled: true
+
+  message: "<gray>[<red>-<gray>] <yellow>{player}</yellow> left the server."
+
+  # If true, this sends no public leave message.
+  silent: false
