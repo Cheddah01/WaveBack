@@ -1,15 +1,18 @@
 package dev.cheddah.waveback.rewards;
 
+import dev.cheddah.waveback.PlaceholderService;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Statistic;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,19 +23,23 @@ public final class RewardsManager {
 
     private final JavaPlugin plugin;
     private final @Nullable Economy economy;
+    private final PlaceholderService placeholderService;
     private final ConcurrentHashMap<UUID, GreetingWindow> activeWindows = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Long> rewardCooldowns = new ConcurrentHashMap<>();
+    private final StatsStore statsStore;
 
     private RewardsConfig config;
 
-    public RewardsManager(JavaPlugin plugin, @Nullable Economy economy) {
+    public RewardsManager(JavaPlugin plugin, @Nullable Economy economy, PlaceholderService placeholderService) {
         this.plugin = plugin;
         this.economy = economy;
-        this.config = RewardsConfig.load(plugin, plugin.getConfig(), economy, false);
+        this.placeholderService = placeholderService;
+        this.statsStore = new StatsStore(plugin);
+        this.config = RewardsConfig.load(plugin, plugin.getConfig(), economy, placeholderService, false);
     }
 
     public void reload(boolean logMoneyWarnings) {
-        config = RewardsConfig.load(plugin, plugin.getConfig(), economy, logMoneyWarnings);
+        config = RewardsConfig.load(plugin, plugin.getConfig(), economy, placeholderService, logMoneyWarnings);
     }
 
     public void shutdown() {
@@ -40,6 +47,7 @@ public final class RewardsManager {
             window.cancel();
         }
         activeWindows.clear();
+        statsStore.save();
     }
 
     public void openWindow(Player joiner, boolean hasPlayedBefore) {
@@ -91,6 +99,7 @@ public final class RewardsManager {
             }
 
             giveRewards(greeter, joiner);
+            statsStore.recordGreeting(greeter);
             sendMessages(greeter, joiner);
         }
     }
@@ -98,6 +107,36 @@ public final class RewardsManager {
     public void testRewards(Player player) {
         giveRewards(player, player);
         sendMessages(player, player);
+    }
+
+    public void showStats(Player player) {
+        int greetings = statsStore.getGreetings(player.getUniqueId());
+        player.sendMessage(MINI_MESSAGE.deserialize("<gray>You have welcomed back <yellow>" + greetings + "</yellow><gray> player(s)."));
+    }
+
+    public int getGreetings(UUID playerId) {
+        return statsStore.getGreetings(playerId);
+    }
+
+    public java.util.OptionalInt getRank(UUID playerId) {
+        return statsStore.rank(playerId);
+    }
+
+    public void showLeaderboard(CommandSender sender) {
+        List<StatsStore.LeaderboardEntry> entries = statsStore.top(10);
+        sender.sendMessage(MINI_MESSAGE.deserialize("<gold>WaveBack Leaderboard"));
+
+        if (entries.isEmpty()) {
+            sender.sendMessage(MINI_MESSAGE.deserialize("<gray>No greetings have been recorded yet."));
+            return;
+        }
+
+        for (int index = 0; index < entries.size(); index++) {
+            StatsStore.LeaderboardEntry entry = entries.get(index);
+            sender.sendMessage(MINI_MESSAGE.deserialize(
+                    "<yellow>#" + (index + 1) + "</yellow> <white>" + entry.name() + "</white><gray>: <green>" + entry.greetings() + "</green>"
+            ));
+        }
     }
 
     private boolean hasMinimumPlaytime(Player joiner) {
@@ -139,12 +178,12 @@ public final class RewardsManager {
     }
 
     private void sendMessages(Player greeter, Player joiner) {
-        String personalMessage = replacePlaceholders(config.rewardReceivedMessage(), greeter, joiner);
+        String personalMessage = placeholderService.apply(greeter, replacePlaceholders(config.rewardReceivedMessage(), greeter, joiner));
         if (!personalMessage.isBlank()) {
             greeter.sendMessage(MINI_MESSAGE.deserialize(personalMessage));
         }
 
-        String broadcastMessage = replacePlaceholders(config.broadcastMessage(), greeter, joiner);
+        String broadcastMessage = placeholderService.apply(greeter, replacePlaceholders(config.broadcastMessage(), greeter, joiner));
         if (!broadcastMessage.isBlank()) {
             Bukkit.broadcast(MINI_MESSAGE.deserialize(broadcastMessage));
         }

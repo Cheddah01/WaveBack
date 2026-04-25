@@ -44,6 +44,7 @@ public final class WaveBackPlugin extends JavaPlugin implements Listener, TabExe
     private String leaveMessageTemplate;
     private SoundSettings leaveSound;
     private FireworkSettings leaveFirework;
+    private PlaceholderService placeholderService;
     private RewardsManager rewardsManager;
 
     @Override
@@ -52,10 +53,12 @@ public final class WaveBackPlugin extends JavaPlugin implements Listener, TabExe
         loadSettings();
 
         getServer().getPluginManager().registerEvents(this, this);
-        rewardsManager = new RewardsManager(this, setupEconomy());
+        placeholderService = setupPlaceholders();
+        rewardsManager = new RewardsManager(this, setupEconomy(), placeholderService);
         rewardsManager.reload(true);
         getServer().getPluginManager().registerEvents(new JoinWatcher(rewardsManager), this);
         getServer().getPluginManager().registerEvents(new ChatWatcher(this, rewardsManager), this);
+        registerPlaceholderExpansion();
 
         var command = getCommand("waveback");
         if (command != null) {
@@ -139,8 +142,39 @@ public final class WaveBackPlugin extends JavaPlugin implements Listener, TabExe
             return true;
         }
 
+        if (args.length == 1 && args[0].equalsIgnoreCase("stats")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(MINI_MESSAGE.deserialize("<red>Only players have personal stats."));
+                return true;
+            }
+
+            if (!player.hasPermission("waveback.stats")) {
+                player.sendMessage(MINI_MESSAGE.deserialize("<red>You do not have permission to view stats."));
+                return true;
+            }
+
+            if (rewardsManager != null) {
+                rewardsManager.showStats(player);
+            }
+            return true;
+        }
+
+        if (args.length == 1 && args[0].equalsIgnoreCase("leaderboard")) {
+            if (!sender.hasPermission("waveback.leaderboard")) {
+                sender.sendMessage(MINI_MESSAGE.deserialize("<red>You do not have permission to view the leaderboard."));
+                return true;
+            }
+
+            if (rewardsManager != null) {
+                rewardsManager.showLeaderboard(sender);
+            }
+            return true;
+        }
+
         sender.sendMessage(MINI_MESSAGE.deserialize("<red>Usage: /" + label + " reload"));
         sender.sendMessage(MINI_MESSAGE.deserialize("<red>Usage: /" + label + " testreward"));
+        sender.sendMessage(MINI_MESSAGE.deserialize("<red>Usage: /" + label + " stats"));
+        sender.sendMessage(MINI_MESSAGE.deserialize("<red>Usage: /" + label + " leaderboard"));
         return true;
     }
 
@@ -152,7 +186,7 @@ public final class WaveBackPlugin extends JavaPlugin implements Listener, TabExe
             @NotNull String[] args
     ) {
         if (args.length == 1) {
-            return List.of("reload", "testreward");
+            return List.of("reload", "testreward", "stats", "leaderboard");
         }
 
         return List.of();
@@ -203,12 +237,26 @@ public final class WaveBackPlugin extends JavaPlugin implements Listener, TabExe
         return registration.getProvider();
     }
 
+    private PlaceholderService setupPlaceholders() {
+        boolean enabled = getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
+        if (enabled) {
+            getLogger().info("PlaceholderAPI found; placeholders will be applied to configurable text.");
+        }
+        return new PlaceholderService(enabled);
+    }
+
+    private void registerPlaceholderExpansion() {
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null && rewardsManager != null) {
+            new WaveBackExpansion(this, rewardsManager).register();
+        }
+    }
+
     private Component renderMessage(String template, Player player) {
         String rendered = template
                 .replace("{player}", player.getName())
                 .replace("{display_name}", PLAIN_TEXT.serialize(player.displayName()));
 
-        return MINI_MESSAGE.deserialize(rendered);
+        return MINI_MESSAGE.deserialize(placeholderService.apply(player, rendered));
     }
 
     private SoundSettings loadSoundSettings(FileConfiguration config, String path, String defaultName) {

@@ -1,5 +1,6 @@
 package dev.cheddah.waveback.rewards;
 
+import dev.cheddah.waveback.PlaceholderService;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -54,6 +55,7 @@ public final class RewardsConfig {
             JavaPlugin plugin,
             FileConfiguration config,
             @Nullable Economy economy,
+            PlaceholderService placeholderService,
             boolean logMoneyWarnings
     ) {
         boolean enabled = config.getBoolean("rewards.enabled", true);
@@ -64,7 +66,7 @@ public final class RewardsConfig {
         long rewardCooldownMillis = Math.max(0, config.getLong("rewards.reward-cooldown-seconds", 300)) * 1000L;
         boolean rewardOnFirstJoin = config.getBoolean("rewards.reward-on-first-join", false);
         int minimumJoinerPlaytimeMinutes = Math.max(0, config.getInt("rewards.minimum-joiner-playtime-minutes", 10));
-        List<Reward> rewards = loadRewards(plugin, config, economy, logMoneyWarnings);
+        List<Reward> rewards = loadRewards(plugin, config, economy, placeholderService, logMoneyWarnings);
         String rewardReceivedMessage = config.getString(
                 "rewards.messages.reward-received",
                 "<gray>✦ Thanks for welcoming <yellow>{joiner}</yellow><gray> back!"
@@ -106,6 +108,7 @@ public final class RewardsConfig {
             JavaPlugin plugin,
             FileConfiguration config,
             @Nullable Economy economy,
+            PlaceholderService placeholderService,
             boolean logMoneyWarnings
     ) {
         List<Reward> rewards = new ArrayList<>();
@@ -116,9 +119,9 @@ public final class RewardsConfig {
 
             String type = getString(section, "type", "").toLowerCase(Locale.ROOT);
             switch (type) {
-                case "command" -> loadCommandReward(plugin, section, index, rewards);
+                case "command" -> loadCommandReward(plugin, section, index, placeholderService, rewards);
                 case "money" -> loadMoneyReward(plugin, section, economy, logMoneyWarnings, rewards);
-                case "item" -> loadItemReward(plugin, section, index, rewards);
+                case "item" -> loadItemReward(plugin, section, index, placeholderService, rewards);
                 default -> plugin.getLogger().warning("Unknown reward type '" + type + "' at rewards.bundle[" + index + "].");
             }
         }
@@ -126,14 +129,20 @@ public final class RewardsConfig {
         return List.copyOf(rewards);
     }
 
-    private static void loadCommandReward(JavaPlugin plugin, Map<?, ?> section, int index, List<Reward> rewards) {
+    private static void loadCommandReward(
+            JavaPlugin plugin,
+            Map<?, ?> section,
+            int index,
+            PlaceholderService placeholderService,
+            List<Reward> rewards
+    ) {
         String command = getString(section, "command", "");
         if (command.isBlank()) {
             plugin.getLogger().warning("Command reward at rewards.bundle[" + index + "] is missing command.");
             return;
         }
 
-        rewards.add(new CommandReward(command));
+        rewards.add(new CommandReward(command, placeholderService));
     }
 
     private static void loadMoneyReward(
@@ -153,7 +162,13 @@ public final class RewardsConfig {
         rewards.add(new MoneyReward(economy, getDouble(section, "amount", 0.0)));
     }
 
-    private static void loadItemReward(JavaPlugin plugin, Map<?, ?> section, int index, List<Reward> rewards) {
+    private static void loadItemReward(
+            JavaPlugin plugin,
+            Map<?, ?> section,
+            int index,
+            PlaceholderService placeholderService,
+            List<Reward> rewards
+    ) {
         String materialName = getString(section, "material", "");
         Material material = Material.matchMaterial(materialName);
         if (material == null || !material.isItem()) {
@@ -164,7 +179,7 @@ public final class RewardsConfig {
         int amount = Math.max(1, getInt(section, "amount", 1));
         String name = getNullableString(section, "name");
         List<String> lore = getStringList(section, "lore");
-        rewards.add(new ItemReward(material, amount, name, lore));
+        rewards.add(new ItemReward(material, amount, name, lore, placeholderService));
     }
 
     private static String getString(Map<?, ?> section, String key, String fallback) {

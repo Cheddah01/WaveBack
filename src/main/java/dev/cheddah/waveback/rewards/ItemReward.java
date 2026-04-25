@@ -1,5 +1,6 @@
 package dev.cheddah.waveback.rewards;
 
+import dev.cheddah.waveback.PlaceholderService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -18,12 +19,14 @@ public final class ItemReward implements Reward {
     private final int amount;
     private final String name;
     private final List<String> lore;
+    private final PlaceholderService placeholderService;
 
-    public ItemReward(Material material, int amount, String name, List<String> lore) {
+    public ItemReward(Material material, int amount, String name, List<String> lore, PlaceholderService placeholderService) {
         this.material = material;
         this.amount = amount;
         this.name = name;
         this.lore = lore;
+        this.placeholderService = placeholderService;
     }
 
     @Override
@@ -33,11 +36,14 @@ public final class ItemReward implements Reward {
 
         if (meta != null) {
             if (name != null && !name.isBlank()) {
-                meta.displayName(deserialize(name));
+                meta.displayName(deserialize(placeholderService.apply(greeter, replacePlaceholders(name, greeter, joiner))));
             }
 
             if (!lore.isEmpty()) {
-                meta.lore(lore.stream().map(ItemReward::deserialize).toList());
+                meta.lore(lore.stream()
+                        .map(line -> placeholderService.apply(greeter, replacePlaceholders(line, greeter, joiner)))
+                        .map(ItemReward::deserialize)
+                        .toList());
             }
 
             stack.setItemMeta(meta);
@@ -51,5 +57,11 @@ public final class ItemReward implements Reward {
 
     private static Component deserialize(String input) {
         return MINI_MESSAGE.deserialize(input).decoration(TextDecoration.ITALIC, false);
+    }
+
+    private String replacePlaceholders(String input, Player greeter, Player joiner) {
+        return input
+                .replace("{player}", greeter.getName())
+                .replace("{joiner}", joiner.getName());
     }
 }

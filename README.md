@@ -19,6 +19,7 @@ WaveBack is a PaperMC plugin for custom join/leave messages and welcome-back rew
 - Java 21
 - Vault is optional and only required for money rewards
 - An economy plugin is required if you enable Vault money rewards
+- PlaceholderAPI is optional and supported for configurable text/commands
 
 ## Installation
 
@@ -44,6 +45,8 @@ plugins/WaveBack/config.yml
 | `/waveback reload` | Reloads the config | `waveback.reload` |
 | `/wb reload` | Alias for reload | `waveback.reload` |
 | `/wb testreward` | Gives yourself the configured reward bundle for testing | `waveback.testreward` |
+| `/wb stats` | Shows your welcome-back greeting count | `waveback.stats` |
+| `/wb leaderboard` | Shows the top welcome-back greeters | `waveback.leaderboard` |
 
 ## Permissions
 
@@ -53,6 +56,19 @@ plugins/WaveBack/config.yml
 | `waveback.greet` | Everyone | Allows earning rewards for greeting returning players |
 | `waveback.bypasscooldown` | False | Bypasses the per-greeter reward cooldown |
 | `waveback.testreward` | OP | Allows testing the configured reward bundle |
+| `waveback.stats` | Everyone | Allows viewing your own greeting stats |
+| `waveback.leaderboard` | Everyone | Allows viewing the greeting leaderboard |
+
+## PlaceholderAPI
+
+WaveBack can parse PlaceholderAPI placeholders in configurable messages, item names/lore, and command rewards when PlaceholderAPI is installed.
+
+WaveBack also provides these placeholders:
+
+| Placeholder | Description |
+| --- | --- |
+| `%waveback_greetings%` | The player's recorded welcome-back greeting count |
+| `%waveback_rank%` | The player's leaderboard rank, or `-` if unranked |
 
 ## Configuration
 
@@ -174,7 +190,7 @@ gradlew.bat build
 The jar is created in:
 
 ```text
-build/libs/waveback-1.0.0.jar
+build/libs/waveback-1.2.0.jar
 ```
 
 Update `baseVersion` in `gradle.properties` before cutting a release build.

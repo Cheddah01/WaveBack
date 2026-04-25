@@ -4,7 +4,7 @@ main: dev.cheddah.waveback.WaveBackPlugin
 api-version: "1.21"
 description: Customize join/leave messages and reward players for welcoming others back.
 author: Colby
-softdepend: [Vault]
+softdepend: [Vault, PlaceholderAPI]
 
 commands:
   waveback:
@@ -27,3 +27,9 @@ permissions:
   waveback.testreward:
     description: Allows testing the configured welcome-back reward bundle.
     default: op
+  waveback.stats:
+    description: Allows viewing your own WaveBack greeting stats.
+    default: true
+  waveback.leaderboard:
+    description: Allows viewing the WaveBack greeting leaderboard.
+    default: true
