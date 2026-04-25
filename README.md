@@ -38,6 +38,17 @@ join:
     name: ENTITY_EXPERIENCE_ORB_PICKUP
     volume: 1.0
     pitch: 1.0
+  firework:
+    enabled: true
+    power: 1
+    type: BALL
+    flicker: false
+    trail: true
+    colors:
+      - LIME
+      - YELLOW
+    fade-colors:
+      - AQUA
 
 leave:
   enabled: true
@@ -70,3 +81,5 @@ or:
 Messages use MiniMessage formatting, such as `<green>`, `<yellow>`, `<bold>`, and gradients.
 
 Sound names use Bukkit's `Sound` enum names, such as `ENTITY_EXPERIENCE_ORB_PICKUP`, `BLOCK_NOTE_BLOCK_PLING`, or `ENTITY_ITEM_BREAK`.
+
+Firework types use Bukkit's `FireworkEffect.Type` names: `BALL`, `BALL_LARGE`, `BURST`, `CREEPER`, and `STAR`.

@@ -20,6 +20,18 @@ join:
     volume: 1.0
     pitch: 1.0
 
+  firework:
+    enabled: false
+    power: 1
+    type: BALL
+    flicker: false
+    trail: true
+    colors:
+      - LIME
+      - YELLOW
+    fade-colors:
+      - AQUA
+
 leave:
   # Set enabled to false if you want Paper's default leave messages again.
   enabled: true

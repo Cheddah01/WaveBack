@@ -3,20 +3,25 @@ package com.example.customjoinmessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +33,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
     private boolean joinSilent;
     private String joinMessageTemplate;
     private SoundSettings joinSound;
+    private FireworkSettings joinFirework;
     private boolean leaveEnabled;
     private boolean leaveSilent;
     private String leaveMessageTemplate;
@@ -60,6 +66,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
 
         event.joinMessage(renderMessage(joinMessageTemplate, event.getPlayer()));
         playSoundToOnlinePlayers(joinSound, null);
+        spawnFirework(event.getPlayer(), joinFirework);
     }
 
     @EventHandler
@@ -121,6 +128,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
                 )
         );
         joinSound = loadSoundSettings(config, "join.sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
+        joinFirework = loadFireworkSettings(config, "join.firework");
 
         leaveEnabled = config.getBoolean("leave.enabled", true);
         leaveSilent = config.getBoolean("leave.silent", false);
@@ -158,6 +166,71 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
         return new SoundSettings(soundEnabled, sound, volume, pitch);
     }
 
+    private FireworkSettings loadFireworkSettings(FileConfiguration config, String path) {
+        boolean fireworkEnabled = config.getBoolean(path + ".enabled", false);
+        int power = Math.max(0, Math.min(3, config.getInt(path + ".power", 1)));
+        boolean flicker = config.getBoolean(path + ".flicker", false);
+        boolean trail = config.getBoolean(path + ".trail", true);
+
+        FireworkEffect.Type type = FireworkEffect.Type.BALL;
+        String typeName = config.getString(path + ".type", "BALL");
+        try {
+            type = FireworkEffect.Type.valueOf(typeName.toUpperCase());
+        } catch (IllegalArgumentException exception) {
+            getLogger().warning("Invalid firework type '" + typeName + "' at " + path + ".type; using BALL.");
+        }
+
+        List<Color> colors = loadColors(config.getStringList(path + ".colors"), List.of(Color.LIME, Color.YELLOW));
+        List<Color> fadeColors = loadColors(config.getStringList(path + ".fade-colors"), List.of(Color.AQUA));
+
+        FireworkEffect effect = FireworkEffect.builder()
+                .with(type)
+                .withColor(colors)
+                .withFade(fadeColors)
+                .flicker(flicker)
+                .trail(trail)
+                .build();
+
+        return new FireworkSettings(fireworkEnabled, power, effect);
+    }
+
+    private List<Color> loadColors(List<String> colorNames, List<Color> defaults) {
+        List<Color> colors = new ArrayList<>();
+        for (String colorName : colorNames) {
+            Color color = parseColor(colorName);
+            if (color != null) {
+                colors.add(color);
+            } else {
+                getLogger().warning("Invalid firework color '" + colorName + "'; skipping it.");
+            }
+        }
+
+        return colors.isEmpty() ? defaults : colors;
+    }
+
+    private @Nullable Color parseColor(String colorName) {
+        return switch (colorName.toUpperCase()) {
+            case "AQUA" -> Color.AQUA;
+            case "BLACK" -> Color.BLACK;
+            case "BLUE" -> Color.BLUE;
+            case "FUCHSIA" -> Color.FUCHSIA;
+            case "GRAY", "GREY" -> Color.GRAY;
+            case "GREEN" -> Color.GREEN;
+            case "LIME" -> Color.LIME;
+            case "MAROON" -> Color.MAROON;
+            case "NAVY" -> Color.NAVY;
+            case "OLIVE" -> Color.OLIVE;
+            case "ORANGE" -> Color.ORANGE;
+            case "PURPLE" -> Color.PURPLE;
+            case "RED" -> Color.RED;
+            case "SILVER" -> Color.SILVER;
+            case "TEAL" -> Color.TEAL;
+            case "WHITE" -> Color.WHITE;
+            case "YELLOW" -> Color.YELLOW;
+            default -> null;
+        };
+    }
+
     private void playSoundToOnlinePlayers(SoundSettings settings, @Nullable UUID excludedPlayerId) {
         if (!settings.enabled() || settings.sound() == null) {
             return;
@@ -172,6 +245,23 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
         }
     }
 
+    private void spawnFirework(Player player, FireworkSettings settings) {
+        if (!settings.enabled()) {
+            return;
+        }
+
+        getServer().getScheduler().runTaskLater(this, () -> {
+            Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
+            FireworkMeta meta = firework.getFireworkMeta();
+            meta.setPower(settings.power());
+            meta.addEffect(settings.effect());
+            firework.setFireworkMeta(meta);
+        }, 5L);
+    }
+
     private record SoundSettings(boolean enabled, @Nullable Sound sound, float volume, float pitch) {
+    }
+
+    private record FireworkSettings(boolean enabled, int power, FireworkEffect effect) {
     }
 }
