@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.example"
-version = "1.0.0"
+version = "${property("baseVersion")}-b${property("buildNumber")}"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
@@ -25,5 +25,9 @@ tasks {
         filesMatching("plugin.yml") {
             expand(props)
         }
+    }
+
+    jar {
+        archiveBaseName.set("custom-join-message")
     }
 }
