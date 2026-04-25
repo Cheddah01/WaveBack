@@ -4,6 +4,7 @@ main: dev.cheddah.customjoinmessage.CustomJoinMessagePlugin
 api-version: "1.21"
 description: Customizes player join messages.
 author: Colby
+softdepend: [Vault]
 
 commands:
   customjoinmessage:
@@ -17,3 +18,9 @@ permissions:
   customjoinmessage.reload:
     description: Allows reloading the CustomJoinMessage configuration.
     default: op
+  customjoinmessage.greet:
+    description: Allows earning rewards for greeting returning players.
+    default: true
+  customjoinmessage.bypasscooldown:
+    description: Bypasses the per-greeter reward cooldown.
+    default: false

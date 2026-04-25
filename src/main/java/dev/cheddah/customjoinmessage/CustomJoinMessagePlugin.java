@@ -1,11 +1,16 @@
 package dev.cheddah.customjoinmessage;
 
+import dev.cheddah.customjoinmessage.rewards.ChatWatcher;
+import dev.cheddah.customjoinmessage.rewards.JoinWatcher;
+import dev.cheddah.customjoinmessage.rewards.RewardsManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Sound;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -39,6 +44,7 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
     private String leaveMessageTemplate;
     private SoundSettings leaveSound;
     private FireworkSettings leaveFirework;
+    private RewardsManager rewardsManager;
 
     @Override
     public void onEnable() {
@@ -46,11 +52,22 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
         loadSettings();
 
         getServer().getPluginManager().registerEvents(this, this);
+        rewardsManager = new RewardsManager(this, setupEconomy());
+        rewardsManager.reload(true);
+        getServer().getPluginManager().registerEvents(new JoinWatcher(rewardsManager), this);
+        getServer().getPluginManager().registerEvents(new ChatWatcher(this, rewardsManager), this);
 
         var command = getCommand("customjoinmessage");
         if (command != null) {
             command.setExecutor(this);
             command.setTabCompleter(this);
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        if (rewardsManager != null) {
+            rewardsManager.shutdown();
         }
     }
 
@@ -98,6 +115,9 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
             reloadConfig();
             updateConfigDefaults();
             loadSettings();
+            if (rewardsManager != null) {
+                rewardsManager.reload(false);
+            }
             sender.sendMessage(MINI_MESSAGE.deserialize("<green>CustomJoinMessage config reloaded."));
             return true;
         }
@@ -148,6 +168,21 @@ public final class CustomJoinMessagePlugin extends JavaPlugin implements Listene
         saveDefaultConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
+    }
+
+    private @Nullable Economy setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            getLogger().info("Vault not found; money rewards will be skipped.");
+            return null;
+        }
+
+        RegisteredServiceProvider<Economy> registration = getServer().getServicesManager().getRegistration(Economy.class);
+        if (registration == null) {
+            getLogger().info("Vault found, but no economy provider is registered; money rewards will be skipped.");
+            return null;
+        }
+
+        return registration.getProvider();
     }
 
     private Component renderMessage(String template, Player player) {

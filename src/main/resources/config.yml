@@ -1,5 +1,11 @@
-# MiniMessage formatting is supported:
-# https://docs.advntr.dev/minimessage/format.html
+# Messages use MiniMessage formatting.
+# Basic colors: <red>, <green>, <yellow>, <aqua>, <gray>, <white>, etc.
+# Hex colors: <#FF5733>text</#FF5733> or shorthand <#FF5733>text
+# Decorations: <bold>, <italic>, <underlined>, <strikethrough>, <obfuscated>
+# Reset formatting: <reset>
+# Gradients: <gradient:#ff5733:#ffaa00>text</gradient>
+# Closing tags are optional in many cases, but recommended for nested formatting.
+# Official docs: https://docs.advntr.dev/minimessage/format.html
 #
 # Placeholders:
 #   {player}       The player's username
@@ -62,3 +68,55 @@ leave:
       - ORANGE
     fade-colors:
       - YELLOW
+
+# ─── Welcome-Back Rewards ──────────────────────────────────────
+# Reward players for welcoming others back to the server.
+rewards:
+  # Master enable switch for this entire feature.
+  enabled: true
+
+  # How long after a join (in seconds) greetings count.
+  greeting-window-seconds: 30
+
+  # Phrases that count as a greeting. Case-insensitive; punctuation
+  # at the start/end is ignored, so "wb!" and "WB" match "wb".
+  triggers:
+    - wb
+    - welcome back
+    - wbb
+    - dubs
+
+  # If true, the entire chat message must equal a trigger.
+  # If false, the trigger can appear anywhere in the message.
+  whole-message-only: true
+
+  # Maximum greeters rewarded per join. 0 = unlimited.
+  max-rewards-per-join: 3
+
+  # Cooldown between rewards for the same greeter (seconds).
+  reward-cooldown-seconds: 300
+
+  # Should rewards trigger on a player's first-ever join?
+  # Usually false since "wb" implies the player is returning.
+  reward-on-first-join: false
+
+  # Minimum playtime (in minutes) the JOINING player must have.
+  # Prevents alt-spam farming. 0 to disable.
+  minimum-joiner-playtime-minutes: 10
+
+  # Bundle of rewards a greeter gets. ALL of these fire together.
+  # Supported types: command, money, item
+  bundle:
+    - type: money
+      amount: 50.0
+    - type: item
+      material: DIAMOND
+      amount: 1
+      name: "<aqua>Thank-You Diamond"
+      lore:
+        - "<gray>For being a kind soul."
+
+  # MiniMessage messages. Set to "" to disable.
+  messages:
+    reward-received: "<gray>✦ Thanks for welcoming <yellow>{joiner}</yellow><gray> back!"
+    broadcast: ""

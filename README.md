@@ -96,6 +96,37 @@ or:
 /cjm reload
 ```
 
+## MiniMessage formatting
+
+MiniMessage is Paper's modern text format for colors, decorations, gradients, and other rich chat styling.
+
+| Type | Examples |
+| --- | --- |
+| Basic colors | `<red>`, `<green>`, `<yellow>`, `<aqua>`, `<gray>`, `<white>` |
+| Hex colors | `<#FF5733>text</#FF5733>` or `<#FF5733>text` |
+| Decorations | `<bold>`, `<italic>`, `<underlined>`, `<strikethrough>`, `<obfuscated>` |
+| Reset | `<reset>` |
+| Gradients | `<gradient:#ff5733:#ffaa00>text</gradient>` |
+
+Closing tags are optional in many cases, but recommended for nested formatting.
+
+Coming from legacy `&` codes?
+
+| Legacy | MiniMessage |
+| --- | --- |
+| `&a` | `<green>` |
+| `&c` | `<red>` |
+| `&e` | `<yellow>` |
+| `&b` | `<aqua>` |
+| `&7` | `<gray>` |
+| `&f` | `<white>` |
+| `&l` | `<bold>` |
+| `&o` | `<italic>` |
+| `&r` | `<reset>` |
+| `&#RRGGBB` | `<#RRGGBB>` |
+
+Official docs: https://docs.advntr.dev/minimessage/format.html
+
 ## Placeholders
 
 - `{player}`: the player's username
